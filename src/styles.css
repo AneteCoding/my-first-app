@@ -30,6 +30,9 @@ h1 {
 .cloud-coverage {
   font-size: 30px;
 }
+.cloud-coverage:first-letter {
+  text-transform: capitalize;
+}
 button {
   border: none;
   border-radius: 4px;
