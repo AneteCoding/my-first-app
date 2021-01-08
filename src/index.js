@@ -28,12 +28,27 @@ function currentDate(date) {
 let currentTime = new Date();
 document.querySelector(".date").innerHTML = currentDate(currentTime);
 
+function formatTime(timestamp) {
+  let date = new Date(timestamp);
+  let hrs = date.getHours();
+  let min = date.getMinutes();
+  if (hrs < 10) {
+    hrs = `0${hrs}`;
+  }
+  if (min < 10) {
+    min = `0${min}`;
+  }
+  return `${hrs}:${min}`;
+}
+
 function displayWeather(response) {
   document.querySelector("h1").innerHTML = response.data.name;
   document.querySelector("#temperature").innerHTML = Math.round(response.data.main.temp);
   document.querySelector("#humidity").innerHTML = response.data.main.humidity;
   document.querySelector("#wind").innerHTML = Math.round(response.data.wind.speed);
-  document.querySelector("#clouds").innerHTML = response.data.weather[0].main;
+  document.querySelector("#clouds").innerHTML = response.data.weather[0].description;
+  document.querySelector("#sunrise").innerHTML = formatTime(response.data.sys.sunrise * 1000);
+  document.querySelector("#sunset").innerHTML = formatTime(response.data.sys.sunset * 1000);
 }
 
 function search(city) {
