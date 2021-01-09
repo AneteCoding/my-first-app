@@ -41,8 +41,11 @@ function formatTime(timestamp) {
   return `${hrs}:${min}`;
 }
 
+
 function displayWeather(response) {
-  console.log(response.data)
+
+  celsiusTemp = response.data.main.temp;
+
   document.querySelector(`h1`).innerHTML = response.data.name;
   document.querySelector(`#temperature`).innerHTML = Math.round(response.data.main.temp);
   document.querySelector(`#humidity`).innerHTML = response.data.main.humidity;
@@ -50,8 +53,31 @@ function displayWeather(response) {
   document.querySelector(`#clouds`).innerHTML = response.data.weather[0].description;
   document.querySelector(`#sunrise`).innerHTML = formatTime(response.data.sys.sunrise * 1000);
   document.querySelector(`#sunset`).innerHTML = formatTime(response.data.sys.sunset * 1000);
-  document.querySelector(`#icon`).setAttribute(`src`, `http://openweathermap.org/img/wn/${response.data.weather[0].icon}@2x.png`)
+  document.querySelector(`#icon`).setAttribute(`src`, `https://openweathermap.org/img/wn/${response.data.weather[0].icon}@2x.png`)
   document.querySelector(`#icon`).setAttribute(`alt`, response.data.weather[0].description)
+}
+
+function displayForecast(response) {
+
+  let forecast = null;
+  let forecastElement = document.querySelector(`#forecast`);
+  forecastElement.innerHTML = null;
+
+  for (let index = 0; index < 6; index++) {
+
+    forecast = response.data.list[index];
+
+    forecastElement.innerHTML += `      
+  <div class="col-2">
+    <h3>
+    ${formatTime(forecast.dt * 1000)}
+    </h2>
+    <h3>
+    ${Math.round(response.data.list[0].main.temp)}°C
+    </h3>
+    <img src= "https://openweathermap.org/img/wn/${response.data.list[0].weather[0].icon}@2x.png"></i>
+  </div>`
+  }
 }
 
 function search(city) {
@@ -59,6 +85,11 @@ function search(city) {
   let apiUrl = `https://api.openweathermap.org/data/2.5/weather?`;
   let units = `metric`;
   axios.get(`${apiUrl}q=${city}&units=${units}&appid=${apiKey}`).then(displayWeather);
+
+  apiUrl = (`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=${units}&appid=${apiKey}`)
+  axios.get(apiUrl).then(displayForecast);
+
+
 }
 
 function searchCity(event) {
@@ -83,20 +114,23 @@ document.querySelector(`#location`).addEventListener(`click`, getPosition);
 
 function convertF(event) {
   event.preventDefault();
-  let temperature = document.querySelector(`#temperature`).innerHTML;
-  temperature = Number(temperature);
-  document.querySelector(`#temperature`).innerHTML = Math.round((temperature * 9) / 5 + 32);
+  document.querySelector(`#celsius-unit`).classList.remove(`active`);
+  document.querySelector(`#farenheit-unit`).classList.add(`active`);
+  document.querySelector(`#temperature`).innerHTML = Math.round((celsiusTemp * 9) / 5 + 32);
 };
 
 document.querySelector(`#farenheit-unit`).addEventListener(`click`, convertF);
 
 function convertC(event) {
   event.preventDefault();
-  let temp = document.querySelector(`#temperature`);
-  temp.innerHTML = 19;
+  document.querySelector(`#celsius-unit`).classList.add(`active`);
+  document.querySelector(`#farenheit-unit`).classList.remove(`active`);
+  document.querySelector(`#temperature`).innerHTML = Math.round(celsiusTemp);
 };
 
 document.querySelector(`#celsius-unit`).addEventListener(`click`, convertC);
+
+let celsiusTemp = null;
 
 search(`Barcelona`);
 
