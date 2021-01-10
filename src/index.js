@@ -22,11 +22,57 @@ function currentDate(date) {
     "November",
     "December"
   ];
+  let hrs = date.getHours();
+  let min = date.getMinutes();
+  if (hrs < 10) {
+    hrs = `0${hrs}`;
+  }
+  if (min < 10) {
+    min = `0${min}`;
+  }
 
-  return `<strong> ${date.getHours() < 10 ? '0' : '' + date.getHours()}:${date.getMinutes() < 10 ? '0' : '' + date.getMinutes()} </strong> ${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  return `<strong> ${hrs}:${min} </strong> ${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 }
 let currentTime = new Date();
-document.querySelector(`.date`).innerHTML = currentDate(currentTime);
+document.querySelector(".date").innerHTML = currentDate(currentTime);
+
+
+
+function getTimestamp(targetTimestampInSec, targetOffsetInSec) {
+  let now = new Date();
+  if (targetTimestampInSec !== null) {
+    now = new Date(targetTimestampInSec * 1000);
+  }
+  return now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + (targetOffsetInSec * 1000);
+
+}
+
+let days = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday"
+];
+
+
+let months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+];
+
 
 function formatTime(timestamp) {
   let date = new Date(timestamp);
@@ -42,10 +88,23 @@ function formatTime(timestamp) {
 }
 
 
+
 function displayWeather(response) {
+
+  let timestamp = getTimestamp(null, response.data.timezone);
+  let now = new Date(timestamp);
+  let hrs = now.getHours();
+  let min = now.getMinutes()
+  if (hrs < 10) {
+    hrs = `0${hrs}`;
+  }
+  if (min < 10) {
+    min = `0${min}`;
+  }
 
   celsiusTemp = response.data.main.temp;
 
+  document.querySelector(`#local-time`).innerHTML = `${hrs}:${min} ${days[now.getDay()]}`
   document.querySelector(`h1`).innerHTML = response.data.name;
   document.querySelector(`#temperature`).innerHTML = Math.round(response.data.main.temp);
   document.querySelector(`#humidity`).innerHTML = response.data.main.humidity;
@@ -57,7 +116,10 @@ function displayWeather(response) {
   document.querySelector(`#icon`).setAttribute(`alt`, response.data.weather[0].description)
 }
 
+
 function displayForecast(response) {
+
+  console.log(response.data)
 
   let forecast = null;
   let forecastElement = document.querySelector(`#forecast`);
@@ -71,11 +133,11 @@ function displayForecast(response) {
   <div class="col-2">
     <h3>
     ${formatTime(forecast.dt * 1000)}
-    </h2>
-    <h3>
-    ${Math.round(response.data.list[0].main.temp)}°C
     </h3>
-    <img src= "https://openweathermap.org/img/wn/${response.data.list[0].weather[0].icon}@2x.png"></i>
+    <h3>
+    ${Math.round(forecast.main.temp)}°C
+    </h3>
+    <img src= "https://openweathermap.org/img/wn/${forecast.weather[0].icon}@2x.png" id="forecast-image"></i>
   </div>`
   }
 }
@@ -88,14 +150,12 @@ function search(city) {
 
   apiUrl = (`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=${units}&appid=${apiKey}`)
   axios.get(apiUrl).then(displayForecast);
-
-
 }
 
 function searchCity(event) {
   event.preventDefault();
   let city = document.querySelector(`#search-city`).value;
-  search(city)
+  search(city);
 }
 document.querySelector(`.search-city`).addEventListener(`submit`, searchCity);
 
